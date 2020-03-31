@@ -1,0 +1,90 @@
+#!/bin/bash
+
+# postinst - called by package manager after our package is installed.
+
+# Set up job run config.
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+echo "⛳ Start $0."
+
+# Do not expand $HOME, we want the string substitution to happen later when
+# cron runs. And ignore shellcheck warning re: use of single quotes.
+# shellcheck disable=SC2016
+USER_CRON_JOB='@hourly /usr/sbin/anacron -s -t $HOME/.anacrontab -S $HOME/.anacron'
+
+# This MDM package is installed via sudo, e.g. `sudo dpkg -i package.deb`.
+# Derive non-root user attributes since the MDM software will later run as
+# non-root.
+NON_ROOT_USER="$(logname)"
+NON_ROOT_UID="$(id -u "$NON_ROOT_USER")"
+NON_ROOT_GID="$(id -g "$NON_ROOT_USER")"
+NON_ROOT_HOME="/home/$NON_ROOT_USER"
+
+USER_ANACRONTAB="$NON_ROOT_HOME/.anacrontab"
+
+USER_ANACRON_STATE_DIR="$NON_ROOT_HOME/.anacron"
+
+# Variables for setting up the anacron job. See anacrontab(5) manpage. Anacron
+# is handy because it will keep track of a job's last run and "catch up" if
+# necessary. This is handy for computers that may not always be running.
+# See also:
+#   https://askubuntu.com/questions/848610/confused-about-relationship-between-cron-and-anacron
+#   https://www.digitalocean.com/community/tutorials/how-to-schedule-routine-tasks-with-cron-and-anacron-on-a-vps
+
+JOB_ID="csats-mdm"
+
+# how often to run the job (in days)
+PERIOD=7
+
+# how long to... wait before running the job? (in minutes)
+DELAY=10
+
+# command anacron will run
+COMMAND="$PERIOD $DELAY $JOB_ID /usr/bin/python3 /usr/lib/python3/dist-packages/csats_mdm/main.py"
+
+# set up anacron state dir
+mkdir -p "$USER_ANACRON_STATE_DIR"
+chmod 0700 "$USER_ANACRON_STATE_DIR"
+chown "$NON_ROOT_UID":"$NON_ROOT_GID" "$USER_ANACRON_STATE_DIR"
+echo "✔️ $USER_ANACRON_STATE_DIR will be used for saving anacron state"
+
+# install anacrontab
+if [[ -e "$USER_ANACRONTAB" ]]
+then
+    echo "✔️ $USER_ANACRONTAB will be used for user-level anacron job"
+else
+    echo "✏️  creating $USER_ANACRONTAB for user-level anacron job"
+    touch "$USER_ANACRONTAB"
+    chown "$NON_ROOT_UID":"$NON_ROOT_GID" "$USER_ANACRONTAB"
+fi
+chmod 0600 "$USER_ANACRONTAB"
+
+# install anacron job
+if grep -q "$JOB_ID" "$USER_ANACRONTAB"
+then
+    echo "✔️ $USER_ANACRONTAB has $JOB_ID. No changes will be made to $USER_ANACRONTAB."
+else
+    echo "✏️  Will add $JOB_ID to $USER_ANACRONTAB."
+    echo "$COMMAND" >> "$USER_ANACRONTAB"
+fi
+
+# set up blank initial crontab to ensure sane precondition / starting state for
+# following code
+if [[ ! -e "/var/spool/cron/crontabs/$NON_ROOT_USER" ]]
+then
+    echo | crontab -u "$NON_ROOT_USER" -
+fi
+
+# install cron job
+if crontab -u "$NON_ROOT_USER" -l | grep -q "$USER_CRON_JOB"
+then
+    echo "✔️ crontab has necessary anacron job. No changes will be made to crontab for $NON_ROOT_USER."
+else
+    echo "✏️  Will add anacron job to crontab for $NON_ROOT_USER."
+    { crontab -u "$NON_ROOT_USER" -l; echo "$USER_CRON_JOB"; } | crontab -u "$NON_ROOT_USER" -
+fi
+
+echo "🎯 Done."

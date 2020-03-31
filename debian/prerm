@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# prerm - called by package manager before our package is removed.
+
+# Clean up job run config and saved state.
+
+set -o errexit
+set -o nounset
+set -o pipefail
+
+echo "⛳ Start $0."
+
+# This MDM package is installed via sudo, e.g. `sudo dpkg -i package.deb`.
+# Derive non-root user attributes since the MDM software will later run as
+# non-root.
+NON_ROOT_USER="$(logname)"
+NON_ROOT_HOME="/home/$NON_ROOT_USER"
+
+JOB_ID='csats-mdm'
+
+set -o xtrace
+
+# remove anacron job
+sed -i "/$JOB_ID/d" "$NON_ROOT_HOME/.anacrontab"
+
+# remove timestamp state file
+rm -f "$NON_ROOT_HOME/.anacron/$JOB_ID"
+
+echo "🎯 Done."

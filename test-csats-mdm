@@ -1,0 +1,3 @@
+#!/bin/bash
+set -o xtrace
+/usr/bin/python3 /usr/lib/python3/dist-packages/csats_mdm/main.py --dry-run

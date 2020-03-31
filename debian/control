@@ -1,0 +1,16 @@
+Source: csats-mdm
+Section: python
+Priority: optional
+Maintainer: Adam Monsen <amonsen@its.jnj.com>
+Build-Depends:
+ debhelper (>= 11~),
+ dh-python,
+ python3-all,
+ python-setuptools
+Standards-Version: 4.3.0
+Homepage: https://git.csats.pizza/csats/devenv
+
+Package: python3-csats-mdm
+Architecture: all
+Depends: ${misc:Depends}, ${python3:Depends}
+Description: C-SATS mobile device management for Ubuntu GNU/Linux workstations

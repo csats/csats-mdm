@@ -1,0 +1,11 @@
+csats-mdm (0.0.2) stable; urgency=medium
+
+  * Updates from code review. Prep for deployment.
+
+ -- Adam Monsen <amonsen@its.jnj.com>  Tue, 31 Mar 2020 14:59:47 -0700
+
+csats-mdm (0.0.1) stable; urgency=medium
+
+  * Initial release
+
+ -- Adam Monsen <amonsen@its.jnj.com>  Tue, 24 Mar 2020 16:57:50 -0700
