@@ -23,7 +23,7 @@ This software will run on (at least) Ubuntu 16.04 and 18.04 64-bit LTS desktop. 
 
 ## Development
 
-Use a C-SATS Ubuntu 18.04 developer workstations to hack on this code.
+Use a C-SATS Ubuntu 18.04 developer workstation to hack on this code.
 
 Install dev/build/test prerequisites with
 
