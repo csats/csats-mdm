@@ -40,7 +40,7 @@ lockEnabled = (True if lockEnabledString == 'true' else False)
 # System76 laptop only had a UUID.
 # example: 'E3PDCG001T3K' or '495BFA80-A959-0000-0000-000000000000' if we fall back to UUID
 machineId = os.popen('sudo dmidecode --string system-serial-number').read().rstrip()
-if lockEnabledString == 'Not Applicable':
+if machineId == 'Not Applicable':
     machineId = os.popen('sudo dmidecode --string system-uuid').read().rstrip()
 
 # compute compliance of above values
