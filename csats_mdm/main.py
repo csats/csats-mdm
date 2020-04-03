@@ -36,8 +36,12 @@ if len(lockEnabledString) < 1:
     lockEnabledString = os.popen('dconf read /org/gnome/desktop/screensaver/lock-enabled').read().rstrip()
 lockEnabled = (True if lockEnabledString == 'true' else False)
 
-# example: 'E3PDCG001T3K'
+# Hopefully unique machine identifier. Dells seem to have a serial ID reliably. One
+# System76 laptop only had a UUID.
+# example: 'E3PDCG001T3K' or '495BFA80-A959-0000-0000-000000000000' if we fall back to UUID
 machineId = os.popen('sudo dmidecode --string system-serial-number').read().rstrip()
+if lockEnabledString == 'Not Applicable':
+    machineId = os.popen('sudo dmidecode --string system-uuid').read().rstrip()
 
 # compute compliance of above values
 compliant = idleDelay <= 300 and lockDelay == 0 and lockEnabled
