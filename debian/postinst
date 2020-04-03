@@ -19,7 +19,7 @@ USER_CRON_JOB='@hourly /usr/sbin/anacron -s -t $HOME/.anacrontab -S $HOME/.anacr
 # Derive non-root user attributes since the MDM software will later run as
 # non-root.
 get_non_root_user() {
-    NRU=$(logname 2>/dev/null || echo ${SUDO_USER})
+    NRU=$(logname 2>/dev/null || echo "${SUDO_USER}")
     if [[ -z "$NRU" ]] || [[ "$NRU" == 'root' ]]
     then
         echo 'Error, unable to derive non-root username'
@@ -27,7 +27,6 @@ get_non_root_user() {
     fi
     echo "$NRU"
 }
-
 NON_ROOT_USER="$(get_non_root_user)"
 NON_ROOT_UID="$(id -u "$NON_ROOT_USER")"
 NON_ROOT_GID="$(id -g "$NON_ROOT_USER")"

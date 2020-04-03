@@ -13,6 +13,15 @@ echo "⛳ Start $0."
 # This MDM package is installed via sudo, e.g. `sudo dpkg -i package.deb`.
 # Derive non-root user attributes since the MDM software will later run as
 # non-root.
+get_non_root_user() {
+    NRU=$(logname 2>/dev/null || echo "${SUDO_USER}")
+    if [[ -z "$NRU" ]] || [[ "$NRU" == 'root' ]]
+    then
+        echo 'Error, unable to derive non-root username'
+        exit 1
+    fi
+    echo "$NRU"
+}
 NON_ROOT_USER="$(logname)"
 NON_ROOT_HOME="/home/$NON_ROOT_USER"
 
