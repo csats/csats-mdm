@@ -55,7 +55,7 @@ machineInfo = {
     'machineId': machineId,
     'compliant': compliant,
 }
-machineInfoJson = json.dumps(machineInfo, separators=(',', ':'))
+machineInfoJson = json.dumps(machineInfo, separators=(',', ':'), sort_keys=True)
 
 message = 'cyberaudit {}\n'.format(machineInfoJson).encode()
 
